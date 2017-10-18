@@ -1,5 +1,6 @@
 package conjunto.de.enteros;
 
+
 public class ConjuntoDeEnteros {
     
     private int[] conjunto;
@@ -20,15 +21,13 @@ public class ConjuntoDeEnteros {
                     auxArrIndice++;
                 }
             }
-            /*******************************
-             *      INSERT
-             *            ARRAYCOPY
-             *                      HERE
-             ********************************/
+            conjunto = new int[auxArrIndice];
+            System.arraycopy(auxArr, 0, conjunto, 0, auxArrIndice);
         }
         
     }
     
+    //Método auxiliar que comprueba si un elemento se haya repetido en un vector
     private boolean validoAux(int[] arr, int value){
         for(int i =0; i<arr.length; i++){        
             if(arr[i]==value)return false;
@@ -41,17 +40,19 @@ public class ConjuntoDeEnteros {
     }
     
     public boolean estáVacío(){
-        return conjunto.length == 0 /*&& Comprobar tambien que no contenga "nulls"*/;
+        return conjunto.length == 0;
+
     }
     
     public boolean añade(int newValue){
-        /*************************
-         *  IMPLEMENTATION
-         *      WITH
-         *    ARRAYCOPY
-         *************************/ 
-
-        return !(conjunto.length == 10 || !validoAux(conjunto, newValue));
+        
+        if(!(conjunto.length == 10) || validoAux(conjunto, newValue)){
+            int[] aux = new int[conjunto.length+1];
+            System.arraycopy(conjunto, 0, aux, 0, conjunto.length);
+            aux[conjunto.length+1] = newValue;
+            conjunto = aux;
+        }
+        return false;
     }
     
     public boolean pertenece(int value){
@@ -63,6 +64,16 @@ public class ConjuntoDeEnteros {
     
     
     public ConjuntoDeEnteros union(ConjuntoDeEnteros compared){
+        if(contenido(compared))return this;
+        if(compared.contenido(this))return compared;
+        
+        int[] aux = new int[conjunto.length + compared.conjunto.length];
+        System.arraycopy(conjunto, 0, aux, 0, conjunto.length);
+        System.arraycopy(compared.conjunto, 0, aux, conjunto.length-1, compared.conjunto.length);
+        return new ConjuntoDeEnteros(aux);
+    }
+    
+    public ConjuntoDeEnteros interseccion(ConjuntoDeEnteros compared){
         int[] aux = new int[10];
         int auxIndice = 0;
         if(compared.cardinal() <= conjunto.length){
@@ -70,6 +81,7 @@ public class ConjuntoDeEnteros {
             for (int i = 0; i < compared.cardinal(); i++) {
                 if(pertenece(compared.conjunto[i])){
                     aux[auxIndice] = compared.conjunto[i];
+                    auxIndice++;
                 }
             }
         }else{
@@ -77,23 +89,38 @@ public class ConjuntoDeEnteros {
             for (int i = 0; i < cardinal(); i++) {
                 if(pertenece(compared.conjunto[i])){
                     aux[auxIndice] = compared.conjunto[i];
+                    auxIndice++;
                 }
             }   
         }
-        int[] resultArr = new int[]{1};
-        /****************************
-         *      AJUSTAR CON
-         *       ARRAYCOPY
-         ****************************/
-        return new ConjuntoDeEnteros(resultArr);
-    }
-    
-    public ConjuntoDeEnteros interseccion(ConjuntoDeEnteros compared){
-        return null;
+        return new ConjuntoDeEnteros(aux);
     }
     
     public ConjuntoDeEnteros diferencia(ConjuntoDeEnteros compared){
-        return null;
+        int[] aux = new int[10];
+        int auxIndice = 0;
+        if(compared.cardinal() <= conjunto.length){
+             for (int i = 0; i < compared.cardinal(); i++) {
+                if(!pertenece(compared.conjunto[i])){
+                    aux[auxIndice] = compared.conjunto[i];
+                    auxIndice++;
+                }
+            }
+            if(auxIndice < cardinal()){
+                System.arraycopy(elementos(), auxIndice, aux, auxIndice, cardinal()-auxIndice);
+            }
+        }else{
+            for (int i = 0; i < cardinal(); i++) {
+                if(!pertenece(compared.conjunto[i])){
+                    aux[auxIndice] = compared.conjunto[i];
+                    auxIndice++;
+                }
+            }
+            if(auxIndice < cardinal()){
+                System.arraycopy(elementos(), auxIndice, aux, auxIndice, cardinal()-auxIndice);
+            }
+        }
+        return new ConjuntoDeEnteros(aux);
     }
     
     public boolean equals(ConjuntoDeEnteros compared){
@@ -121,7 +148,6 @@ public class ConjuntoDeEnteros {
                 }
             }
             return true;
-            
         }
     }
     
